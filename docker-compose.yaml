@@ -1,0 +1,35 @@
+version: "3.1"
+
+services:
+  postgres:
+    image: postgres
+    container_name: app_keycloak_postgres
+    tty: true
+    volumes:
+      - ./.docker/postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    ports:
+      - 15432:5432
+
+  keycloak:
+    build: .
+    container_name: app_keycloak
+    volumes:
+      - ./app-theme/build/app-theme:/opt/jboss/keycloak/themes/app-theme
+      - ./keycloak/config/standalone-ha.xml:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PORT: 5432
+      DB_PASSWORD: password
+      KEYCLOAK_USER: milena
+      KEYCLOAK_PASSWORD: milena
+    ports:
+      - 8088:8080
+    depends_on:
+      - postgres
